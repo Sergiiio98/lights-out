@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.scss";
+import GameDevice from "./components/gameDevice/gameDevice";
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="topBar">
+        <h1 style={{ textAlign: "center", color: "white" }}>Lights </h1>{" "}
+        <h1 style={{ textAlign: "center", color: "#b39ddb" }}> Out</h1>
+      </div>
+      <GameDevice />
     </div>
   );
 }
 
 export default App;
+
+// time stop
+// display sorted
+// sound off
+// help modal === same as how to play
+// first nickname then how to play
+// this nickname is used
+// end game handle

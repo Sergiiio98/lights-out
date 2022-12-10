@@ -1,0 +1,22 @@
+  body {
+    height: 100%;
+    background-color: #0a192a;
+  }
+ 
+.App{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  
+}
+
+.topBar{
+  width: 100vw;
+  background-color: #050d15;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
