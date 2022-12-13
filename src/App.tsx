@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import "./App.scss";
 import GameDevice from "./components/gameDevice/gameDevice";
 
@@ -16,10 +16,5 @@ function App() {
 
 export default App;
 
-// time stop
-// display sorted
-// sound off
-// help modal === same as how to play
-// first nickname then how to play
 // this nickname is used
 // end game handle

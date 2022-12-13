@@ -1,3 +1,4 @@
+import { clear } from "console";
 import { useEffect, useState } from "react";
 
 interface IWatch {
@@ -7,15 +8,24 @@ interface IWatch {
 }
 
 const StopWatch = ({ stopWatchStatus, time, setTime }: IWatch) => {
-  useEffect(() => {
-    let interval = undefined;
+  const [intervalID, setIntervalID] = useState<NodeJS.Timer>();
 
+  function startTimer() {
+    let interval = setInterval(() => {
+      setTime((time: number) => time + 10);
+    }, 10);
+    setIntervalID(interval);
+  }
+
+  function stopTimer() {
+    clearInterval(intervalID);
+  }
+
+  useEffect(() => {
     if (stopWatchStatus === true) {
-      interval = setInterval(() => {
-        setTime((time: number) => time + 10);
-      }, 10);
-    } else {
-      clearInterval(interval);
+      startTimer();
+    } else if (stopWatchStatus === false) {
+      stopTimer();
     }
   }, [stopWatchStatus]);
 

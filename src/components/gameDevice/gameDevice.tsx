@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { levels } from "../../assets/levels";
 import StopWatch from "../stopWatch/stopWatch";
 import { db } from "../../utils/firebase";
+import HowToPlayModal from "../howToPlayModal/howToPlayModal";
+
 import {
   collection,
   getDocs,
@@ -20,21 +22,31 @@ const GameDevice = () => {
   const [level, setLevel] = useState(0);
   const [boardState, setBoardState] = useState(levels[level]);
   const [gameStatus, setGameStatus] = useState(false);
-  const [nickname, setNickname] = useState<String | null>("");
+  const [nickname, setNickname] = useState<any>(
+    localStorage.getItem("nickname")
+  );
   const [moves, setMoves] = useState(0);
   const [time, setTime] = useState(0);
   const [scores, setScores] = useState<DocumentData>([]);
+  const [soundState, setSoundState] = useState(true);
+  const [opened, setOpened] = useState(true);
+  const [input, setInput] = useState("");
+  const [help, setHelp] = useState(false);
 
   const playLevelSound = () => {
-    console.log("test");
     const audio = new Audio(sound);
-    audio.play();
+
+    if (soundState === true) {
+      audio.play();
+    }
   };
 
   const playWinSound = () => {
-    console.log("test");
     const audio = new Audio(winSound);
-    audio.play();
+
+    if (soundState === true) {
+      audio.play();
+    }
   };
 
   useEffect(() => {
@@ -49,10 +61,6 @@ const GameDevice = () => {
         playWinSound();
         saveUserScore(nickname, moves, time);
         setGameStatus(false);
-        setTime(0);
-        getUsers(db).then((users) => {
-          setScores(users);
-        });
       }
 
       if (level + 1 < levels.length) {
@@ -67,13 +75,14 @@ const GameDevice = () => {
   }, [level]);
 
   useEffect(() => {
-    const userNickname = prompt("Set you nickname: ");
-    setNickname(userNickname);
-  }, []);
+    if (nickname != "Guest" || nickname === "")
+      localStorage.setItem("nickname", nickname);
+  }, [nickname]);
 
   useEffect(() => {
     getUsers(db).then((users) => {
-      setScores(users);
+      let sortedScores = sortTopPlayers(users);
+      setScores(sortedScores);
     });
   }, []);
 
@@ -135,28 +144,66 @@ const GameDevice = () => {
     time: number
   ) {
     await setDoc(doc(db, "users", uuidv4()), {
-      nickname: nickname ? nickname : "Guest",
+      nickname: nickname != "null" ? nickname : "Guest",
       moves: moves,
       time: time,
+    });
+
+    getUsers(db).then((users) => {
+      let sortedScores = sortTopPlayers(users);
+      setScores(sortedScores);
     });
   }
 
   const sortTopPlayers = (list: DocumentData) => {
-    list.sort((a: any, b: any) => (a.moves > b.moves ? 1 : -1));
-    console.log(list);
-    list.sort((a: any, b: any) => (a.time > b.time ? 1 : -1));
-    console.log(list);
-  };
+    list.sort((a: any, b: any) => {
+      if (a.moves === b.moves) {
+        return a.time < b.time ? -1 : 1;
+      } else {
+        return a.moves < b.moves ? -1 : 1;
+      }
+    });
 
-  sortTopPlayers(scores);
+    return list;
+  };
 
   return (
     <div className="mainWindow">
+      {nickname ? null : (
+        <HowToPlayModal
+          opened={opened}
+          setOpened={setOpened}
+          input={input}
+          nickname={nickname}
+          setInput={setInput}
+          setNickname={setNickname}
+          nickInputIncluded={nickname ? false : true}
+          scores={scores}
+        />
+      )}
+      {help ? (
+        <HowToPlayModal
+          opened={opened}
+          setOpened={setOpened}
+          input={input}
+          setInput={setInput}
+          nickname={nickname}
+          setNickname={setNickname}
+          nickInputIncluded={nickname ? false : true}
+          scores={scores}
+        />
+      ) : null}
+
       <div className="gamePart">
         <div className="userScore">
           <h2 className="textScore" style={{ textAlign: "center" }}>
             Scoreboard
           </h2>
+          <h3 className="textScore">
+            Playername:{" "}
+            {nickname === ("null" || "" || null) ? "Guest" : nickname}
+          </h3>
+
           <h3 className="textScore">Level: {level + 1}</h3>
           <h3 className="textScore">Moves: {moves}</h3>
           <StopWatch
@@ -173,21 +220,61 @@ const GameDevice = () => {
             Level: {level + 1}/{levels.length}
           </h3>
           {renderBoard()}
-          <div className="buttonsBox">
-            <div className="buttonRow">
-              <button onClick={startGame} className="button"></button>
-              <h5 className="buttonDescription">Start</h5>
+          <div style={{ display: "flex", flexDirection: "row" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "end",
+                justifyContent: "flex-end",
+                paddingBottom: "15px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginLeft: "25px",
+                }}
+              >
+                <button
+                  onClick={() => window.location.reload()}
+                  className="blueButton"
+                ></button>
+                <h5 style={{ marginTop: "0", fontSize: "10px" }}>Try Again</h5>
+              </div>
             </div>
-            <div className="buttonRow">
-              <button onClick={playLevelSound} className="button"></button>
-              <h5 className="buttonDescription">Sound</h5>
-            </div>
-            <div className="buttonRow">
-              <button onClick={playWinSound} className="button"></button>
-              <h5 className="buttonDescription">Help</h5>
+            <div className="buttonsBox">
+              <div className="buttonRow">
+                <button onClick={startGame} className="button"></button>
+                <h5 className="buttonDescription">Start</h5>
+              </div>
+              <div className="buttonRow">
+                <button
+                  onClick={() => setSoundState((prev) => !prev)}
+                  className="button"
+                ></button>
+                {soundState ? (
+                  <h5 className="buttonDescription">Sound</h5>
+                ) : (
+                  <s>
+                    <h5 className="buttonDescription">Sound</h5>
+                  </s>
+                )}
+              </div>
+              <div className="buttonRow">
+                <button
+                  onClick={() => {
+                    setHelp(true);
+                  }}
+                  className="button"
+                ></button>
+                <h5 className="buttonDescription">Help</h5>
+              </div>
             </div>
           </div>
-          <button className="blueButton"></button>
         </div>
       </div>
       <div className="gamePart">
