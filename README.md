@@ -11,6 +11,7 @@
 
 ## General info
 Lights Out is web based logical game
+https://lights-out-mu.vercel.app/
 
 ## Technologies
 Project is created with:
@@ -19,6 +20,9 @@ Project is created with:
 * TypeScript
 * React.js
 * Firebase (Firestore DB)
+
+* Realtime database saving
+* Using local storage to store user data
 
 	
 ## Setup
